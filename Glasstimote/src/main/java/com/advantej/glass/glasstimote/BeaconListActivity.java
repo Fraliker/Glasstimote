@@ -24,7 +24,6 @@ import java.util.List;
 public class BeaconListActivity extends Activity {
 
     private GlasstimoteService mService;
-
     private List<Beacon> mBeaconList;
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
