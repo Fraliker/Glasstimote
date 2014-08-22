@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
+import com.estimote.sdk.Utils;
 import com.google.android.glass.timeline.LiveCard;
 
 import java.util.List;
@@ -19,8 +20,21 @@ import java.util.List;
 public class GlasstimoteService extends Service {
 
     private static final String LIVE_CARD_TAG = "BEACONS_CARD";
+    private static final int TMW_BEACONS_MAJOR = 200;
+    private static final int CREATIVE_BEACON_MINOR = 1;
+    private static final int KITCHEN_BEACON_MINOR = 2;
+    private static final int TECH_BEACON_MINOR = 3;
+    private static final double ENTER_THRESHOLD = 1.5;
+    private static final double EXIT_THRESHOLD = 2.5;
     private LiveCard mLiveCard;
     private RemoteViews mLiveCardView;
+    private Beacon _kitchenBeacon;
+    private Beacon _creativeBeacon;
+    private Beacon _techBeacon;
+
+    private Region.State _creativeRegionState = Region.State.OUTSIDE;
+    private Region.State _kitchenRegionState = Region.State.OUTSIDE;
+    private Region.State _techRegionState = Region.State.OUTSIDE;
 
 
     private BeaconManager mBeaconManager;
@@ -68,7 +82,6 @@ public class GlasstimoteService extends Service {
         } else {
             connectToService();
         }
-
     }
 
     private void connectToService() {
@@ -98,13 +111,63 @@ public class GlasstimoteService extends Service {
             mBeacons = beacons;
 
             int count = beacons.size();
+
             if (count > 0) {
-                publishOrUpdateLiveCard(beacons.size());
+
+                // publishOrUpdateLiveCard(count);
+
+                checkBeaconPositions();
+
             } else if (count == 0) {
                 unpublishLiveCard();
             }
         }
     };
+
+    private void checkBeaconPositions() {
+
+        // loop through beacons.
+        for (Beacon beacon : mBeacons) {
+
+            // ensure these are the TMW estimotes.
+            if (beacon.getMajor() == TMW_BEACONS_MAJOR) {
+
+                int beaconMinor = beacon.getMinor();
+
+                // check which estimote this is and set variables accordingly.
+                if (beaconMinor == CREATIVE_BEACON_MINOR) {
+
+                    _kitchenBeacon = beacon;
+                }
+                else if (beaconMinor == KITCHEN_BEACON_MINOR) {
+
+                    _creativeBeacon = beacon;
+                }
+                else if (beaconMinor == TECH_BEACON_MINOR) {
+
+                    _techBeacon = beacon;
+                }
+            }
+        }
+
+        if (_creativeBeacon != null) {
+
+            // get the distance between the beacon and the device.
+            double creativeBeaconDistance = Utils.computeAccuracy(_creativeBeacon);
+
+            // if we are close to the beacon, and not already in a state inside the beacon's range...
+            if (creativeBeaconDistance < ENTER_THRESHOLD && _creativeRegionState == Region.State.OUTSIDE) {
+
+                // switch to a state inside the range of this beacon.
+                _creativeRegionState = Region.State.INSIDE;
+
+                // TODO : display a live card appropriate to this beacon.
+
+                // TODO : we need a method to switch the state back to Region.State.OUTSIDE when the beacon goes out of range,
+                // or if another beacon comes into range. (there should only ever be one 'active' beacon.
+            }
+        }
+    }
 
     private void publishOrUpdateLiveCard(int beaconCount){
 

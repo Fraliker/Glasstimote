@@ -82,6 +82,14 @@ public class BeaconListActivity extends Activity {
 
                 tmpCard = new Card(context);
                 tmpCard.addImage(R.drawable.beacon_gray);
+
+                /*
+                String imageName = "beacon_grey";
+                int resourceID = getResources().getIdentifier(imageName, "drawable", getPackageName());
+                System.out.println("resourceID: " + resourceID);
+                //tmpCard.addImage(resourceID);
+                */
+
                 tmpCard.setText(beacon.getName() + ":" + beacon.getMacAddress() + "\n Power : " + beacon.getMeasuredPower());
                 tmpCard.setFootnote(String.format("Major:%s  Minor:%s", beacon.getMajor(), beacon.getMinor()));
 
