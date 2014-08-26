@@ -30,7 +30,7 @@ public class BeaconListActivity extends Activity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
 
-            mService = ((GlasstimoteService.MyBinder)binder).getService();
+            mService = ((GlasstimoteService.GlassAppBinder)binder).getService();
 
             if (mService != null) {
                 mBeaconList = mService.getBeacons();
