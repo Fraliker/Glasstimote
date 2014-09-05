@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -19,6 +20,8 @@ import com.google.android.glass.timeline.LiveCard;
 import java.util.List;
 
 public class GlasstimoteService extends Service {
+
+
 
     private static final String TAG = "munky";
     private static final String LIVE_CARD_TAG = "BEACONS_CARD";
@@ -34,9 +37,6 @@ public class GlasstimoteService extends Service {
     
     private LiveCard _beaconsLiveCard;
     private RemoteViews _beaconsLiveCardView;
-    private Beacon _kitchenBeacon;
-    private Beacon _creativeBeacon;
-    private Beacon _techBeacon;
 
     private Region.State _creativeRegionState = Region.State.OUTSIDE;
     private Region.State _kitchenRegionState = Region.State.OUTSIDE;
@@ -117,156 +117,75 @@ public class GlasstimoteService extends Service {
 
             _beacons = beacons;
 
-            int count = beacons.size();
-
-            if (count > 0) {
-
-                // publishOrUpdateLiveCard(count);
+            if (beacons.size() > 0) {
 
                 checkBeaconPositions();
-
-            } else if (count == 0) {
-                unpublishLiveCard();
             }
         }
     };
 
     private void checkBeaconPositions() {
 
+        // Log.i(TAG, "total beacons received: " + _beacons.size());
+
         // loop through beacons.
         for (Beacon beacon : _beacons) {
 
             // ensure these are the TMW estimotes.
-            if (beacon.getMajor() == TMW_BEACONS_MAJOR) {
-
-                int beaconMinor = beacon.getMinor();
-
-                // check which estimote this is and set variables accordingly.
-                if (beaconMinor == CREATIVE_BEACON_MINOR) {
-
-                    _creativeBeacon = beacon;
-                }
-                else if (beaconMinor == KITCHEN_BEACON_MINOR) {
-
-                    _kitchenBeacon = beacon;
-                }
-                else if (beaconMinor == TECH_BEACON_MINOR) {
-
-                    _techBeacon = beacon;
-                }
-            }
-        }
-
-        if (_creativeBeacon != null) {
+            if (beacon.getMajor() != TMW_BEACONS_MAJOR) continue;
 
             // get the distance between the beacon and the device.
-            double creativeBeaconDistance = Utils.computeAccuracy(_creativeBeacon);
+            double beaconDistance = Utils.computeAccuracy(beacon);
+            int beaconMinor = beacon.getMinor();
 
-            // if we are close to the beacon, and not already in a state inside the beacon's range...
-            if (creativeBeaconDistance < BEACON_REGION_ENTRY_DISTANCE) {
 
-                if (_creativeRegionState == Region.State.OUTSIDE) {
+            if (beaconDistance < BEACON_REGION_ENTRY_DISTANCE) {
+
+                // if we are close to a specific beacon, and not already in
+                // a state inside the beacon's region range...
+                if (beaconMinor == CREATIVE_BEACON_MINOR && _creativeRegionState == Region.State.OUTSIDE) {
+
+                    Log.i(TAG, "entering creative... distance: " + beaconDistance);
+
+                    //
+                    // stop looking for the other beacons, as we are in range of this one.
+                    try {
+                        _beaconManager.stopRanging(KITCHEN_BEACON_REGION);
+                        _beaconManager.stopRanging(TECH_BEACON_REGION);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    //
 
                     // switch to a state inside the range of this beacon.
                     _creativeRegionState = Region.State.INSIDE;
+                    showLiveCard(getString(R.string.creative_beacon));
+                    // break;
 
+                } else if (beaconMinor == KITCHEN_BEACON_MINOR && _kitchenRegionState == Region.State.OUTSIDE) {
+
+                    Log.i(TAG, "entering kitchen... distance: " + beaconDistance);
+
+                    //
                     // stop looking for the other beacons, as we are in range of this one.
                     try {
-                        _beaconManager.stopRanging(KITCHEN_BEACON_REGION);
+                        _beaconManager.stopRanging(CREATIVE_BEACON_REGION);
                         _beaconManager.stopRanging(TECH_BEACON_REGION);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-
-                    showLiveCard("creative");
-
-                    // return early to stop other beacons getting mixed up.
-                    return;
-                }
-            } else if (creativeBeaconDistance >= BEACON_REGION_EXIT_DISTANCE) {
-
-                if (_creativeRegionState == Region.State.INSIDE) {
-
-                    // switch to a state outside the range of this beacon.
-                    _creativeRegionState = Region.State.OUTSIDE;
-
-                    Log.i(TAG, "hiding creative live card text...");
-                    // unpublishLiveCard();
-                    updateCardLocationText(getString(R.string.discovering));
-
-
-                    // restart looking for the other beacons, as we are no longer in range of this one.
-                    try {
-                        _beaconManager.startRanging(KITCHEN_BEACON_REGION);
-                        _beaconManager.startRanging(TECH_BEACON_REGION);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        if (_kitchenBeacon != null) {
-
-            // get the distance between the beacon and the device.
-            double kitchenBeaconDistance = Utils.computeAccuracy(_kitchenBeacon);
-
-            // if we are close to the beacon, and not already in a state inside the beacon's range...
-            if (kitchenBeaconDistance < BEACON_REGION_ENTRY_DISTANCE) {
-
-                if (_kitchenRegionState == Region.State.OUTSIDE) {
+                    //
 
                     // switch to a state inside the range of this beacon.
                     _kitchenRegionState = Region.State.INSIDE;
+                    showLiveCard(getString(R.string.kitchen_beacon));
+                    // break;
 
-                    // stop looking for the other beacons, as we are in range of this one.
-                    try {
-                        _beaconManager.stopRanging(CREATIVE_BEACON_REGION);
-                        _beaconManager.stopRanging(TECH_BEACON_REGION);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
+                } else if (beaconMinor == TECH_BEACON_MINOR && _techRegionState == Region.State.OUTSIDE) {
 
-                    showLiveCard("kitchen");
+                    Log.i(TAG, "entering tech... distance: " + beaconDistance);
 
-                    // return early to stop other beacons getting mixed up.
-                    return;
-                }
-
-            } else if (kitchenBeaconDistance >= BEACON_REGION_EXIT_DISTANCE) {
-
-                if (_kitchenRegionState == Region.State.INSIDE) {
-
-                    // switch to a state outside the range of this beacon.
-                    _kitchenRegionState = Region.State.OUTSIDE;
-
-                    Log.i(TAG, "left the kitchen location...");
-                    updateCardLocationText(getString(R.string.discovering));
-
-                    // restart looking for the other beacons, as we are no longer in range of this one.
-                    try {
-                        _beaconManager.startRanging(CREATIVE_BEACON_REGION);
-                        _beaconManager.startRanging(TECH_BEACON_REGION);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        if (_techBeacon != null) {
-        
-            // get the distance between the beacon and the device.
-            double techBeaconDistance = Utils.computeAccuracy(_techBeacon);
-
-            // if we are close to the beacon, and not already in a state inside the beacon's range...
-            if (techBeaconDistance < BEACON_REGION_ENTRY_DISTANCE) {
-
-                if (_techRegionState == Region.State.OUTSIDE) {
-
-                    // switch to a state inside the range of this beacon.
-                    _techRegionState = Region.State.INSIDE;
-
+                    //
                     // stop looking for the other beacons, as we are in range of this one.
                     try {
                         _beaconManager.stopRanging(CREATIVE_BEACON_REGION);
@@ -274,33 +193,79 @@ public class GlasstimoteService extends Service {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
+                    //
 
-                    showLiveCard("tech");
+                    // switch to a state inside the range of this beacon.
+                    _techRegionState = Region.State.INSIDE;
+                    showLiveCard(getString(R.string.tech_beacon));
+                    // break;
 
-                    // return early to stop other beacons getting mixed up.
-                    // currently commented out since this is the last statement within the containing method.
-                    // return;
                 }
+            } else if (beaconDistance >= BEACON_REGION_EXIT_DISTANCE) {
 
-            } else if (techBeaconDistance >= BEACON_REGION_EXIT_DISTANCE) {
+                // if we are far enough away from a specific beacon region,
+                // and not already in a state outside the beacon's region range...
+                if (beaconMinor == CREATIVE_BEACON_MINOR && _creativeRegionState == Region.State.INSIDE) {
 
-                if (_techRegionState == Region.State.INSIDE) {
+                    Log.i(TAG, "exiting creative... distance: " + beaconDistance);
+
                     // switch to a state outside the range of this beacon.
-                    _techRegionState = Region.State.OUTSIDE;
-
-                    // unpublishLiveCard();
+                    _creativeRegionState = Region.State.OUTSIDE;
                     updateCardLocationText(getString(R.string.discovering));
 
-                    Log.i(TAG, "left the tech location...");
 
+
+                    //
                     // restart looking for the other beacons, as we are no longer in range of this one.
+                    try {
+                        _beaconManager.startRanging(KITCHEN_BEACON_REGION);
+                        _beaconManager.startRanging(TECH_BEACON_REGION);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    //
 
+                    // break;
+
+                } else if (beaconMinor == KITCHEN_BEACON_MINOR && _kitchenRegionState == Region.State.INSIDE) {
+
+                    Log.i(TAG, "exiting kitchen... distance: " + beaconDistance);
+
+                    // switch to a state outside the range of this beacon.
+                    _kitchenRegionState = Region.State.OUTSIDE;
+                    updateCardLocationText(getString(R.string.discovering));
+
+                    //
+                    // restart looking for the other beacons, as we are no longer in range of this one.
+                    try {
+                        _beaconManager.startRanging(CREATIVE_BEACON_REGION);
+                        _beaconManager.startRanging(TECH_BEACON_REGION);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    //
+
+                    // break;
+
+                } else if (beaconMinor == TECH_BEACON_MINOR && _techRegionState == Region.State.INSIDE) {
+
+                    Log.i(TAG, "exiting tech... distance: " + beaconDistance);
+
+                    // switch to a state outside the range of this beacon.
+                    _techRegionState = Region.State.OUTSIDE;
+                    updateCardLocationText(getString(R.string.discovering));
+
+                    //
+                    // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
                         _beaconManager.startRanging(CREATIVE_BEACON_REGION);
                         _beaconManager.startRanging(KITCHEN_BEACON_REGION);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
+                    //
+
+                    // break;
                 }
             }
         }

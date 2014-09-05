@@ -8,6 +8,9 @@
     <string name="error_bluetooth_not_enabled">Bluetooth not enabled</string>
     <string name="error_bluetooth_le_unsupported">Device does not have Bluetooth Low Energy</string>
     <string name="discovering">Discovering...</string>
+    <string name="creative_beacon">Creative</string>
+    <string name="kitchen_beacon">Kitchen</string>
+    <string name="tech_beacon">Tech</string>
     <string name="lc_details">Details</string>
 
 </resources>
