@@ -9,29 +9,30 @@
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_gravity="top"
+        android:paddingLeft="10px"
+        android:paddingRight="10px">
+
         <TextView
             android:drawableLeft="@drawable/beacon_gray"
-            android:drawablePadding="40px"
+            android:drawablePadding="26px"
             android:id="@+id/location_name"
-            android:textSize="60px"
+            android:textSize="74px"
+            android:textStyle="bold"
             android:text="Location Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             />
-        <ScrollView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-            <TextView
 
-                android:id="@+id/location_info"
-                android:textSize="40px"
-                android:paddingTop="10px"
-                android:text="Some example location info text Some example location info text Some example location info text Some example location info text Some example location info text Some example location info text Some example location info text "
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </ScrollView>
+        <TextView
+            android:id="@+id/location_info"
+            android:textSize="40px"
+            android:paddingTop="10px"
+            android:text="Zorbing (globe-riding, sphereing, orbing) is the recreation or sport of rolling downhill inside an orb, generally made of transparent plastic. Zorbing is generally performed on a gentle slope, but can also be done on a level surface in pubs and clubs around the UK, permitting more rider control. In the absence of hills some operators have constructed inflatable, wooden or metal ramps."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
     </LinearLayout>
 
 </FrameLayout>

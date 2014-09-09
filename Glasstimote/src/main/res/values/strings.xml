@@ -3,7 +3,7 @@
 
     <string name="app_name">Glasstimote</string>
     <string name="action_settings">Settings</string>
-    <string name="lc_stop">Stop</string>
+    <string name="lc_stop">Exit App</string>
     <string name="voice_start">Scan Beacons</string>
     <string name="error_bluetooth_not_enabled">Bluetooth not enabled</string>
     <string name="error_bluetooth_le_unsupported">Device does not have Bluetooth Low Energy</string>
