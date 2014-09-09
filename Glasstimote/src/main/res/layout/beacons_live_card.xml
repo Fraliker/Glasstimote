@@ -3,18 +3,18 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:keepScreenOn="true">
+             android:keepScreenOn="true"
+             android:padding="40px">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:paddingLeft="10px"
-        android:paddingRight="10px">
+        android:layout_gravity="top">
+
 
         <TextView
-            android:drawableLeft="@drawable/beacon_gray"
+            android:drawableLeft="@drawable/discovering_icon"
             android:drawablePadding="26px"
             android:id="@+id/location_name"
             android:textSize="74px"

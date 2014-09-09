@@ -63,7 +63,7 @@ public class GlasstimoteService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        showLiveCard(getString(R.string.discovering), R.drawable.beacon_gray);
+        showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
         checkBTStatusAndStartRanging();
         return START_STICKY;
     }
@@ -153,7 +153,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state inside the range of this beacon.
                     _creativeRegionState = Region.State.INSIDE;
-                    showLiveCard(getString(R.string.creative_beacon), R.drawable.cookie);
+                    showLiveCard(R.drawable.creative_location_icon, getString(R.string.creative_location_title), getString(R.string.creative_location_info));
 
                 } else if (beaconMinor == KITCHEN_BEACON_MINOR && _kitchenRegionState == Region.State.OUTSIDE) {
 
@@ -169,7 +169,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state inside the range of this beacon.
                     _kitchenRegionState = Region.State.INSIDE;
-                    showLiveCard(getString(R.string.kitchen_beacon), R.drawable.cookie);
+                    showLiveCard(R.drawable.kitchen_location_icon, getString(R.string.kitchen_location_title), getString(R.string.kitchen_location_info));
 
                 } else if (beaconMinor == TECH_BEACON_MINOR && _techRegionState == Region.State.OUTSIDE) {
 
@@ -185,7 +185,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state inside the range of this beacon.
                     _techRegionState = Region.State.INSIDE;
-                    showLiveCard(getString(R.string.tech_beacon), R.drawable.cookie);
+                    showLiveCard(R.drawable.tech_location_icon, getString(R.string.tech_location_title), getString(R.string.tech_location_info));
                 }
             } else if (beaconDistance >= BEACON_REGION_EXIT_DISTANCE) {
 
@@ -197,7 +197,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state outside the range of this beacon.
                     _creativeRegionState = Region.State.OUTSIDE;
-                    showLiveCard(getString(R.string.discovering), R.drawable.beacon_gray);
+                    showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
 
                     // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
@@ -213,7 +213,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state outside the range of this beacon.
                     _kitchenRegionState = Region.State.OUTSIDE;
-                    showLiveCard(getString(R.string.discovering), R.drawable.beacon_gray);
+                    showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
 
                     // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
@@ -229,7 +229,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state outside the range of this beacon.
                     _techRegionState = Region.State.OUTSIDE;
-                    showLiveCard(getString(R.string.discovering), R.drawable.beacon_gray);
+                    showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
 
                     // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
@@ -243,7 +243,7 @@ public class GlasstimoteService extends Service {
         }
     }
 
-    private void showLiveCard (String locationName, int locationImage) {
+    private void showLiveCard (int locationImage, String locationName, String locationInfo) {
 
         Log.i(TAG, "showing live card: " + locationName);
 
@@ -261,15 +261,16 @@ public class GlasstimoteService extends Service {
             _beaconsLiveCard.publish(LiveCard.PublishMode.REVEAL);
         }
 
-        updateCardLocation(locationName, locationImage);
+        updateCardLocation(locationImage, locationName, locationInfo);
     }
 
-    private void updateCardLocation(String locationText, int locationImage) {
+    private void updateCardLocation(int locationImage, String locationTitle, String locationInfo) {
 
         if (_beaconsLiveCard != null) {
 
             _beaconsLiveCardView.setTextViewCompoundDrawables(R.id.location_name, locationImage, 0, 0, 0);
-            _beaconsLiveCardView.setTextViewText(R.id.location_name, locationText);
+            _beaconsLiveCardView.setTextViewText(R.id.location_name, locationTitle);
+            _beaconsLiveCardView.setTextViewText(R.id.location_info, locationInfo);
             _beaconsLiveCard.setViews(_beaconsLiveCardView);
         }
     }
@@ -284,9 +285,5 @@ public class GlasstimoteService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return _binder;
-    }
-
-    public List<Beacon> getBeacons() {
-        return _beacons;
     }
 }

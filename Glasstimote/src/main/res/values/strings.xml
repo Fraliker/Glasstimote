@@ -7,10 +7,14 @@
     <string name="voice_start">Scan Beacons</string>
     <string name="error_bluetooth_not_enabled">Bluetooth not enabled</string>
     <string name="error_bluetooth_le_unsupported">Device does not have Bluetooth Low Energy</string>
-    <string name="discovering">Discovering...</string>
-    <string name="creative_beacon">Creative</string>
-    <string name="kitchen_beacon">Kitchen</string>
-    <string name="tech_beacon">Tech</string>
+    <string name="discovering_title">Discovering...</string>
+    <string name="discovering_info">looking for iBeacons...</string>
+    <string name="creative_location_title">Creative</string>
+    <string name="creative_location_info">Creative location info...</string>
+    <string name="kitchen_location_title">Kitchen</string>
+    <string name="kitchen_location_info">Kitchen location info...</string>
+    <string name="tech_location_title">Tech</string>
+    <string name="tech_location_info">Tech location info...</string>
     <string name="lc_details">Details</string>
 
 </resources>
