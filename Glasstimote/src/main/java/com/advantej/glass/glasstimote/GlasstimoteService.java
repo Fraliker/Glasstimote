@@ -75,17 +75,16 @@ public class GlasstimoteService extends Service {
 
         // Check if device supports Bluetooth Low Energy.
         if (!_beaconManager.hasBluetooth()) {
-            Toast.makeText(this, getString(R.string.error_bluetooth_le_unsupported), Toast.LENGTH_LONG).show();
-            return;
-        }
 
-        // If Bluetooth is not enabled, let user enable it.
-        if (!_beaconManager.isBluetoothEnabled()) {
+            Toast.makeText(this, getString(R.string.error_bluetooth_le_unsupported), Toast.LENGTH_LONG).show();
+
+        } else if (!_beaconManager.isBluetoothEnabled()) {
+
+            // If Bluetooth is not enabled, let user enable it.
             Toast.makeText(this, getString(R.string.error_bluetooth_not_enabled), Toast.LENGTH_LONG).show();
 
-            // currently commented out since this is the last statement within the containing method.
-            //return;
         } else {
+
             connectToService();
         }
     }
