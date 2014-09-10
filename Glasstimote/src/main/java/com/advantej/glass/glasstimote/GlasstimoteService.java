@@ -27,14 +27,15 @@ public class GlasstimoteService extends Service {
     private static final int CREATIVE_BEACON_MINOR = 1;
     private static final int KITCHEN_BEACON_MINOR = 2;
     private static final int TECH_BEACON_MINOR = 3;
-    private static final double BEACON_REGION_ENTRY_DISTANCE = 0.4;
-    private static final double BEACON_REGION_EXIT_DISTANCE = 0.8;
+    private static final double BEACON_REGION_ENTRY_DISTANCE = 0.8;
+    private static final double BEACON_REGION_EXIT_DISTANCE = 1.8;
     private static final Region CREATIVE_BEACON_REGION = new Region("creative", null, TMW_BEACONS_MAJOR, CREATIVE_BEACON_MINOR);
     private static final Region KITCHEN_BEACON_REGION = new Region("kitchen", null, TMW_BEACONS_MAJOR, KITCHEN_BEACON_MINOR);
     private static final Region TECH_BEACON_REGION = new Region("tech", null, TMW_BEACONS_MAJOR, TECH_BEACON_MINOR);
     
     private LiveCard _beaconsLiveCard;
-    private RemoteViews _beaconsLiveCardView;
+    private RemoteViews _beaconLocationView;
+    private RemoteViews _discoveringView;
 
     private Region.State _creativeRegionState = Region.State.OUTSIDE;
     private Region.State _kitchenRegionState = Region.State.OUTSIDE;
@@ -63,7 +64,9 @@ public class GlasstimoteService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
+        createLiveCard();
+        _beaconsLiveCard.setViews(_discoveringView);
+
         checkBTStatusAndStartRanging();
         return START_STICKY;
     }
@@ -197,7 +200,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state outside the range of this beacon.
                     _creativeRegionState = Region.State.OUTSIDE;
-                    showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
+                    _beaconsLiveCard.setViews(_discoveringView);
 
                     // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
@@ -213,7 +216,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state outside the range of this beacon.
                     _kitchenRegionState = Region.State.OUTSIDE;
-                    showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
+                    _beaconsLiveCard.setViews(_discoveringView);
 
                     // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
@@ -229,7 +232,7 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state outside the range of this beacon.
                     _techRegionState = Region.State.OUTSIDE;
-                    showLiveCard(R.drawable.discovering_icon, getString(R.string.discovering_title), getString(R.string.discovering_info));
+                    _beaconsLiveCard.setViews(_discoveringView);
 
                     // restart looking for the other beacons, as we are no longer in range of this one.
                     try {
@@ -243,35 +246,35 @@ public class GlasstimoteService extends Service {
         }
     }
 
-    private void showLiveCard (int locationImage, String locationName, String locationInfo) {
-
-        Log.i(TAG, "showing live card: " + locationName);
-
+    private void createLiveCard ()
+    {
         if (_beaconsLiveCard == null) {
             // create a new live card.
             _beaconsLiveCard = new LiveCard(this, LIVE_CARD_TAG);
-
-            _beaconsLiveCardView = new RemoteViews(getPackageName(), R.layout.beacons_live_card);
 
             Intent menuIntent = new Intent(this, LiveCardMenuActivity.class);
             menuIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             _beaconsLiveCard.setAction(PendingIntent.getActivity(this, 0, menuIntent, 0));
 
-            //Publish card
+            // publish card.
             _beaconsLiveCard.publish(LiveCard.PublishMode.REVEAL);
-        }
 
-        updateCardLocation(locationImage, locationName, locationInfo);
+            // create views.
+            _discoveringView = new RemoteViews(getPackageName(), R.layout.discovering_card);
+            _beaconLocationView = new RemoteViews(getPackageName(), R.layout.beacon_location_card);
+        }
     }
 
-    private void updateCardLocation(int locationImage, String locationTitle, String locationInfo) {
+    private void showLiveCard (int locationImage, String locationTitle, String locationInfo) {
+
+        Log.i(TAG, "showing live card: " + locationTitle);
 
         if (_beaconsLiveCard != null) {
 
-            _beaconsLiveCardView.setTextViewCompoundDrawables(R.id.location_name, locationImage, 0, 0, 0);
-            _beaconsLiveCardView.setTextViewText(R.id.location_name, locationTitle);
-            _beaconsLiveCardView.setTextViewText(R.id.location_info, locationInfo);
-            _beaconsLiveCard.setViews(_beaconsLiveCardView);
+            _beaconLocationView.setImageViewResource(R.id.location_icon, locationImage);
+            _beaconLocationView.setTextViewText(R.id.location_name, locationTitle);
+            _beaconLocationView.setTextViewText(R.id.location_info, locationInfo);
+            _beaconsLiveCard.setViews(_beaconLocationView);
         }
     }
 

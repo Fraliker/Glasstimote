@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:keepScreenOn="true">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top">
+
+        <ImageView
+            android:id="@+id/location_icon"
+            android:layout_width="240px"
+            android:layout_height="360px" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginLeft="30px"
+            android:paddingTop="40px"
+            android:paddingLeft="0px"
+            android:paddingRight="40px">
+
+                <TextView
+                    android:id="@+id/location_name"
+                    android:textSize="50px"
+                    android:textStyle="bold"
+                    android:text="Location Name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    />
+
+                <TextView
+                    android:id="@+id/location_info"
+                    android:textSize="30px"
+                    android:paddingTop="10px"
+                    android:text="Zorbing (globe-riding, sphereing, orbing) is the recreation or sport of rolling downhill inside an orb, generally made of transparent plastic. Zorbing is generally performed on a gentle slope, but can also be done on a level surface in pubs and clubs around the UK, permitting more rider control. In the absence of hills some operators have constructed inflatable, wooden or metal ramps."
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
