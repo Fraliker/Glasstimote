@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:padding="40px">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="140px"
+            android:layout_height="140px"
+            android:id="@+id/progressBar"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/discovering_text"
+            android:textSize="80px"
+            android:text="@+string/discovering_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            />
+
+    </LinearLayout>
+
+</FrameLayout>
