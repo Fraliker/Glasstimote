@@ -28,6 +28,7 @@ if (isset($_GET["minor"])) {
             $result = mysql_fetch_array($result);
 
             $ibeacon = array();
+
             $ibeacon["pid"] = $result["pid"];
             $ibeacon["name"] = $result["name"];
             $ibeacon["colour"] = $result["colour"];
@@ -35,6 +36,9 @@ if (isset($_GET["minor"])) {
             $ibeacon["major"] = $result["major"];
             $ibeacon["minor"] = $result["minor"];
             $ibeacon["image"] = $result["image"];
+            $ibeacon["location_name"] = $result["location_name"];
+            $ibeacon["location_info"] = $result["location_info"];
+
             // success
             $response["success"] = 1;
 
