@@ -1,9 +1,12 @@
-package com.advantej.glass.glasstimote;
+package com.advantej.glass.glasstimote.activities;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.advantej.glass.glasstimote.R;
+import com.advantej.glass.glasstimote.services.GlasstimoteService;
 
 /**
  * Created by tejas on 5/2/14.

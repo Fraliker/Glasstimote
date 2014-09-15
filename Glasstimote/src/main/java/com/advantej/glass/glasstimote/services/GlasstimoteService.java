@@ -1,4 +1,4 @@
-package com.advantej.glass.glasstimote;
+package com.advantej.glass.glasstimote.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,6 +10,8 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.advantej.glass.glasstimote.activities.LiveCardMenuActivity;
+import com.advantej.glass.glasstimote.R;
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
@@ -22,6 +24,7 @@ public class GlasstimoteService extends Service {
 
 
     private static final String TAG = "munky";
+
     private static final String LIVE_CARD_TAG = "BEACONS_CARD";
     private static final int TMW_BEACONS_MAJOR = 200;
     private static final int CREATIVE_BEACON_MINOR = 1;

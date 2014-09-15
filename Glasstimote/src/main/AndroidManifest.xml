@@ -19,10 +19,10 @@
 
         <activity android:name=".BeaconListActivity"/>
 
-        <activity android:name="com.advantej.glass.glasstimote.LiveCardMenuActivity" />
+        <activity android:name=".activities.LiveCardMenuActivity" />
 
         <service
-            android:name="com.advantej.glass.glasstimote.GlasstimoteService"
+            android:name=".services.GlasstimoteService"
             android:enabled="true"
             android:exported="true" >
 
