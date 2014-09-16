@@ -3,6 +3,7 @@ package com.advantej.glass.glasstimote.services;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -12,12 +13,17 @@ import android.widget.Toast;
 
 import com.advantej.glass.glasstimote.activities.LiveCardMenuActivity;
 import com.advantej.glass.glasstimote.R;
+import com.advantej.glass.glasstimote.tasks.DataUpdateTask;
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 import com.estimote.sdk.Utils;
 import com.google.android.glass.timeline.LiveCard;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class GlasstimoteService extends Service {
@@ -35,6 +41,10 @@ public class GlasstimoteService extends Service {
     private static final Region CREATIVE_BEACON_REGION = new Region("creative", null, TMW_BEACONS_MAJOR, CREATIVE_BEACON_MINOR);
     private static final Region KITCHEN_BEACON_REGION = new Region("kitchen", null, TMW_BEACONS_MAJOR, KITCHEN_BEACON_MINOR);
     private static final Region TECH_BEACON_REGION = new Region("tech", null, TMW_BEACONS_MAJOR, TECH_BEACON_MINOR);
+    private static final String REQUEST_STRING_MINOR = "minor";
+    private static final NameValuePair REQUEST_PARAMS_CREATIVE_MINOR = new BasicNameValuePair(REQUEST_STRING_MINOR, Integer.toString(CREATIVE_BEACON_MINOR));
+    private static final NameValuePair REQUEST_PARAMS_KITCHEN_MINOR = new BasicNameValuePair(REQUEST_STRING_MINOR, Integer.toString(KITCHEN_BEACON_MINOR));
+    private static final NameValuePair REQUEST_PARAMS_TECH_MINOR = new BasicNameValuePair(REQUEST_STRING_MINOR, Integer.toString(TECH_BEACON_MINOR));
     
     private LiveCard _beaconsLiveCard;
     private RemoteViews _beaconLocationView;
@@ -47,6 +57,13 @@ public class GlasstimoteService extends Service {
     private BeaconManager _beaconManager;
     private List<Beacon> _beacons = null;
     private final IBinder _binder = new GlassAppBinder();
+
+    private DataUpdateTask _dataUpdateTask;
+
+    //private Intent _dataUpdateIntent;
+
+    private ArrayList<NameValuePair> _requestParamsList = new ArrayList<NameValuePair>();
+
 
     public class GlassAppBinder extends Binder {
         public GlasstimoteService getService() {
@@ -62,6 +79,9 @@ public class GlasstimoteService extends Service {
         super.onCreate();
         _beaconManager = new BeaconManager(this);
         _beaconManager.setRangingListener(_rangingListener);
+
+        // _dataUpdateIntent = new Intent(this, DataUpdateActivity.class);
+        // _dataUpdateIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
     }
 
     @Override
@@ -158,7 +178,11 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state inside the range of this beacon.
                     _creativeRegionState = Region.State.INSIDE;
-                    showLiveCard(R.drawable.creative_location_icon, getString(R.string.creative_location_title), getString(R.string.creative_location_info));
+
+                    _requestParamsList.clear();
+                    _requestParamsList.add(REQUEST_PARAMS_CREATIVE_MINOR);
+
+                    loadLocationData();
 
                 } else if (beaconMinor == KITCHEN_BEACON_MINOR && _kitchenRegionState == Region.State.OUTSIDE) {
 
@@ -174,7 +198,11 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state inside the range of this beacon.
                     _kitchenRegionState = Region.State.INSIDE;
-                    showLiveCard(R.drawable.kitchen_location_icon, getString(R.string.kitchen_location_title), getString(R.string.kitchen_location_info));
+
+                    _requestParamsList.clear();
+                    _requestParamsList.add(REQUEST_PARAMS_KITCHEN_MINOR);
+
+                    loadLocationData();
 
                 } else if (beaconMinor == TECH_BEACON_MINOR && _techRegionState == Region.State.OUTSIDE) {
 
@@ -190,7 +218,11 @@ public class GlasstimoteService extends Service {
 
                     // switch to a state inside the range of this beacon.
                     _techRegionState = Region.State.INSIDE;
-                    showLiveCard(R.drawable.tech_location_icon, getString(R.string.tech_location_title), getString(R.string.tech_location_info));
+
+                    _requestParamsList.clear();
+                    _requestParamsList.add(REQUEST_PARAMS_TECH_MINOR);
+
+                    loadLocationData();
                 }
             } else if (beaconDistance >= BEACON_REGION_EXIT_DISTANCE) {
 
@@ -248,6 +280,22 @@ public class GlasstimoteService extends Service {
         }
     }
 
+    private void loadLocationData ()
+    {
+        Log.i(TAG, "request params value: " + _requestParamsList.get(0).getValue());
+
+        //startActivity(_dataUpdateIntent);
+
+        // cancel old update task if it exists
+        if (_dataUpdateTask != null)
+        {
+            _dataUpdateTask.cancel(true);
+        }
+
+        _dataUpdateTask = new DataUpdateTask();
+        _dataUpdateTask.run(_requestParamsList);
+    }
+
     private void createLiveCard ()
     {
         if (_beaconsLiveCard == null) {
@@ -267,21 +315,21 @@ public class GlasstimoteService extends Service {
         }
     }
 
-    private void showLiveCard (int locationImage, String locationTitle, String locationInfo) {
-
-        Log.i(TAG, "showing live card: " + locationTitle);
-
-        if (_beaconsLiveCard != null) {
-
-            _beaconLocationView.setImageViewResource(R.id.location_icon, locationImage);
+    public void showLiveCard (Bitmap locationImage, String locationTitle, String locationInfo)
+    {
+        if (_beaconsLiveCard != null)
+        {
+            _beaconLocationView.setImageViewBitmap(R.id.location_icon, locationImage);
             _beaconLocationView.setTextViewText(R.id.location_name, locationTitle);
             _beaconLocationView.setTextViewText(R.id.location_info, locationInfo);
             _beaconsLiveCard.setViews(_beaconLocationView);
         }
     }
 
-    private void unpublishLiveCard() {
-        if (_beaconsLiveCard != null && _beaconsLiveCard.isPublished()) {
+    private void unpublishLiveCard ()
+    {
+        if (_beaconsLiveCard != null && _beaconsLiveCard.isPublished())
+        {
             _beaconsLiveCard.unpublish();
             _beaconsLiveCard = null;
         }
