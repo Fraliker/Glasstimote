@@ -1,14 +1,12 @@
 package com.advantej.glass.glasstimote.tasks;
 
-import android.content.ComponentName;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
-import com.advantej.glass.glasstimote.services.GlasstimoteService;
+import com.advantej.glass.glasstimote.model.vo.LocationDataVO;
 import com.advantej.glass.glasstimote.utils.JSONParser;
 
 import org.apache.http.NameValuePair;
@@ -30,35 +28,16 @@ public class DataUpdateTask extends AsyncTask<String, String, String>
     private static final String JSON_NODE_LOCATION_INFO = "location_info";
     private static final String JSON_NODE_SUCCESS = "success";
 
-    private GlasstimoteService _glasstimoteService;
     private ArrayList<NameValuePair> _requestParamsList;
     private JSONParser _jsonParser = new JSONParser();
-    private JSONObject _iBeaconData;
+    private LocationDataVO _locationDataVO = new LocationDataVO();
+    private Message _dataUpdatedMessage;
 
-    private ServiceConnection _glasstimoteServiceConnection = new ServiceConnection()
+    public void run (ArrayList<NameValuePair> requestParamsList, Message dataUpdatedMessage)
     {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder binder)
-        {
-            _glasstimoteService = ((GlasstimoteService.GlassAppBinder)binder).getService();
+        Log.i(TAG, "DataUpdateTask:: [run]");
 
-            if (_glasstimoteService != null)
-            {
-                // run task...
-                Log.i(TAG, "DataUpdateActivity connected to GlasstimoteService.");
-
-                //_dataUpdateTask = new DataUpdateTask();
-                //_dataUpdateTask.run(_glasstimoteService.getRequestParamsList)
-            }
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {}
-    };
-
-    public void run (ArrayList<NameValuePair> requestParamsList)
-    {
+        _dataUpdatedMessage = dataUpdatedMessage;
         _requestParamsList = requestParamsList;
         this.execute();
     }
@@ -78,22 +57,20 @@ public class DataUpdateTask extends AsyncTask<String, String, String>
             if (success == 1)
             {
                 JSONArray iBeaconsArray = json.getJSONArray(IBEACON_DATA_REQUEST_NAME);
-                _iBeaconData = iBeaconsArray.getJSONObject(0);
+                JSONObject iBeaconData = iBeaconsArray.getJSONObject(0);
 
                 if (!isCancelled()) {
-                    Log.i(TAG, "loading image: " + _iBeaconData.getString(JSON_NODE_IMAGE_REQUEST));
 
-                    // Running separate Async task for image
+                    Log.i(TAG, "location name: " + iBeaconData.getString(JSON_NODE_LOCATION_NAME));
+                    Log.i(TAG, "location info: " + iBeaconData.getString(JSON_NODE_LOCATION_INFO));
+                    Log.i(TAG, "location image: " + iBeaconData.getString(JSON_NODE_IMAGE_REQUEST));
+
+                    _locationDataVO.locationName = iBeaconData.getString(JSON_NODE_LOCATION_NAME);
+                    _locationDataVO.locationInfo = iBeaconData.getString(JSON_NODE_LOCATION_INFO);
+
+                    // Run a separate Async task for downloading the image.
                     ImageDownloader imageDownloader = new ImageDownloader();
-                    imageDownloader.execute(_iBeaconData.getString(JSON_NODE_IMAGE_REQUEST));
-
-                    //TextView locationName = (TextView) findViewById(R.id.location_name);
-
-                    // Finding Fields
-                    // txtName = (TextView) findViewById(R.id.name);
-
-                    // Displaying
-                    // txtName.setText(iBeaconData.getString("location_name"));
+                    imageDownloader.execute(iBeaconData.getString(JSON_NODE_IMAGE_REQUEST));
                 }
 
             } else {
@@ -118,15 +95,19 @@ public class DataUpdateTask extends AsyncTask<String, String, String>
 
     private class ImageDownloader extends AsyncTask<String, Void, Bitmap>
     {
-        protected Bitmap doInBackground(String... URL)
+        protected Bitmap doInBackground(String... imageURLArray)
         {
-            String imageURL = URL[0];
+            String imageURL = imageURLArray[0];
             Bitmap bitmap = null;
 
             try
             {
-                InputStream input = new java.net.URL(imageURL).openStream();
-                bitmap = BitmapFactory.decodeStream(input);
+                Log.i(TAG, "ImageDownloader:: [doInBackground] is cancelled? " + isCancelled());
+                if (!isCancelled())
+                {
+                    InputStream input = new java.net.URL(imageURL).openStream();
+                    bitmap = BitmapFactory.decodeStream(input);
+                }
             }
             catch (Exception e)
             {
@@ -140,15 +121,12 @@ public class DataUpdateTask extends AsyncTask<String, String, String>
         {
             Log.i(TAG, "image task post execute handler.");
 
-            // imgMain = (ImageView) findViewById(R.id.image);
-            // imgMain.setImageBitmap(loadedImage);
+            if (!isCancelled())
+            {
+                _locationDataVO.locationImage = loadedImage;
 
-            if (!isCancelled()) {
-                try {
-                    _glasstimoteService.showLiveCard(loadedImage, _iBeaconData.getString(JSON_NODE_LOCATION_NAME), _iBeaconData.getString(JSON_NODE_LOCATION_INFO));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                _dataUpdatedMessage.obj = _locationDataVO;
+                _dataUpdatedMessage.sendToTarget();
             }
         }
     }

@@ -5,7 +5,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 
 import com.advantej.glass.glasstimote.activities.LiveCardMenuActivity;
 import com.advantej.glass.glasstimote.R;
+import com.advantej.glass.glasstimote.model.vo.LocationDataVO;
 import com.advantej.glass.glasstimote.tasks.DataUpdateTask;
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
@@ -45,6 +48,7 @@ public class GlasstimoteService extends Service {
     private static final NameValuePair REQUEST_PARAMS_CREATIVE_MINOR = new BasicNameValuePair(REQUEST_STRING_MINOR, Integer.toString(CREATIVE_BEACON_MINOR));
     private static final NameValuePair REQUEST_PARAMS_KITCHEN_MINOR = new BasicNameValuePair(REQUEST_STRING_MINOR, Integer.toString(KITCHEN_BEACON_MINOR));
     private static final NameValuePair REQUEST_PARAMS_TECH_MINOR = new BasicNameValuePair(REQUEST_STRING_MINOR, Integer.toString(TECH_BEACON_MINOR));
+    private static final int DATA_UPDATED_MESSAGE_CODE = 0;
     
     private LiveCard _beaconsLiveCard;
     private RemoteViews _beaconLocationView;
@@ -60,19 +64,17 @@ public class GlasstimoteService extends Service {
 
     private DataUpdateTask _dataUpdateTask;
 
-    //private Intent _dataUpdateIntent;
-
     private ArrayList<NameValuePair> _requestParamsList = new ArrayList<NameValuePair>();
 
 
-    public class GlassAppBinder extends Binder {
+    public class GlassAppBinder extends Binder
+    {
         public GlasstimoteService getService() {
             return GlasstimoteService.this;
         }
     }
 
-    public GlasstimoteService() {
-    }
+    public GlasstimoteService(){}
 
     @Override
     public void onCreate() {
@@ -282,18 +284,21 @@ public class GlasstimoteService extends Service {
 
     private void loadLocationData ()
     {
-        Log.i(TAG, "request params value: " + _requestParamsList.get(0).getValue());
+        Log.i(TAG, "GlasstimoteService:: [locaLocationData] request params value: " + _requestParamsList.get(0).getValue());
 
         //startActivity(_dataUpdateIntent);
 
         // cancel old update task if it exists
         if (_dataUpdateTask != null)
         {
+            Log.i(TAG, "GlasstimoteService:: [locaLocationData] cancelling task.");
             _dataUpdateTask.cancel(true);
         }
 
+        Message dataUpdatedMessage = _messageQueueHandler.obtainMessage(DATA_UPDATED_MESSAGE_CODE);
+
         _dataUpdateTask = new DataUpdateTask();
-        _dataUpdateTask.run(_requestParamsList);
+        _dataUpdateTask.run(_requestParamsList, dataUpdatedMessage);
     }
 
     private void createLiveCard ()
@@ -339,4 +344,27 @@ public class GlasstimoteService extends Service {
     public IBinder onBind(Intent intent) {
         return _binder;
     }
+
+
+    private Handler _messageQueueHandler = new Handler()
+    {
+        @Override
+        public void handleMessage (Message message)
+        {
+            switch (message.what)
+            {
+                case DATA_UPDATED_MESSAGE_CODE:
+
+                    Log.i(TAG, "GlasstimoteService:: [_messageQueueHandler] updated data message received");
+
+                    LocationDataVO vo = (LocationDataVO) message.obj;
+
+                    showLiveCard(vo.locationImage, vo.locationName, vo.locationInfo);
+
+                    break;
+            }
+
+            super.handleMessage(message);
+        }
+    };
 }
