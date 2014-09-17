@@ -35,7 +35,7 @@ if (isset($_GET["minor"])) {
             $ibeacon["address"] = $result["address"];
             $ibeacon["major"] = $result["major"];
             $ibeacon["minor"] = $result["minor"];
-            $ibeacon["image"] = $result["image"];
+            $ibeacon["location_image_url"] = $result["location_image_url"];
             $ibeacon["location_name"] = $result["location_name"];
             $ibeacon["location_info"] = $result["location_info"];
 

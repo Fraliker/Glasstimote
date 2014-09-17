@@ -23,7 +23,7 @@ public class DataUpdateTask extends AsyncTask<String, String, String>
     private static final String IBEACON_DATA_URL = "http://mayfly.tmwtest.co.uk/glasstimote/android_connect/get_ibeacon_details.php";
     private static final String IBEACON_DATA_REQUEST_NAME = "ibeacon";
     private static final String IBEACON_DATA_REQUEST_METHOD = "GET";
-    private static final String JSON_NODE_IMAGE_REQUEST = "image";
+    private static final String JSON_NODE_IMAGE_REQUEST = "location_image_url";
     private static final String JSON_NODE_LOCATION_NAME = "location_name";
     private static final String JSON_NODE_LOCATION_INFO = "location_info";
     private static final String JSON_NODE_SUCCESS = "success";
@@ -48,7 +48,9 @@ public class DataUpdateTask extends AsyncTask<String, String, String>
     protected String doInBackground(String...strings)
     {
         // Making the http request using the php layer
+        // TODO : add try/catch, with catch defining UnknownHostException.
         final JSONObject json = _jsonParser.makeHttpRequest(IBEACON_DATA_URL, IBEACON_DATA_REQUEST_METHOD, _requestParamsList);
+
 
         try
         {
