@@ -39,7 +39,7 @@
             <TextView
                 android:id="@+id/location_info"
                 android:textSize="30px"
-                android:paddingTop="10px"
+                android:paddingTop="4px"
                 android:text="Zorbing (globe-riding, sphereing, orbing) is the recreation or sport of rolling downhill inside an orb, generally made of transparent plastic."
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

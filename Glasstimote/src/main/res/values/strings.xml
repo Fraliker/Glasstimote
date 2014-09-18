@@ -14,7 +14,7 @@
     <string name="kitchen_location_title">Kitchen</string>
     <string name="kitchen_location_info">Kitchen location info...</string>
     <string name="tech_location_title">Tech</string>
-    <string name="tech_location_info">Tech location info...</string>
+    <string name="tech_location_info">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce mollis justo sed nulla lacinia, ac facilisis felis semper. Nullam feugiat venenatis leo, a feugiat ipsum congue sed. Pellentesque ut justo sed odio cursus tincidunt. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</string>
     <string name="lc_details">Details</string>
 
 </resources>
