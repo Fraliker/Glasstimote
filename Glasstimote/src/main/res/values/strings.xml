@@ -9,12 +9,12 @@
     <string name="error_bluetooth_le_unsupported">Device does not have Bluetooth Low Energy</string>
     <string name="discovering_title">Scanning</string>
     <string name="discovering_info">looking for iBeacons...</string>
-    <string name="creative_location_title">Creative</string>
-    <string name="creative_location_info">Creative location info...</string>
-    <string name="kitchen_location_title">Kitchen</string>
-    <string name="kitchen_location_info">Kitchen location info...</string>
-    <string name="tech_location_title">Tech</string>
-    <string name="tech_location_info">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce mollis justo sed nulla lacinia, ac facilisis felis semper. Nullam feugiat venenatis leo, a feugiat ipsum congue sed. Pellentesque ut justo sed odio cursus tincidunt. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</string>
+    <string name="creative_location_title">At the Google Glass base</string>
+    <string name="creative_location_info">Get yourself over to the Pinterest Board and post something up.</string>
+    <string name="kitchen_location_title">You are at Reception</string>
+    <string name="kitchen_location_info">And finally, find your way back to the Google Glasses desk to pass them on.</string>
+    <string name="tech_location_title">You are at the Pinterest Board</string>
+    <string name="tech_location_info">Now go and see the ladies on reception to complete your Expo survey.</string>
     <string name="lc_details">Details</string>
 
 </resources>
